@@ -1,8 +1,8 @@
 <div *ngIf="usuario">
   <h3>Bem-vindo(a), {{ usuario.nome }}</h3>
 
-  <img [src]="avatar" width="100" />
-  <input type="file" (change)="uploadAvatar($event)" />
+  <img title="{{avatar}}" [src]="avatar" width="100" />
+  <input title="avatar" type="file" (change)="uploadAvatar($event)" />
 
   <label for="perfil">Selecione seu Perfil:</label>
   <select id="perfil" [(ngModel)]="selectedPerfil" (change)="selecionarPerfil(selectedPerfil)">

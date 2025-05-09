@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { createClient, User } from '@supabase/supabase-js';
 import { environment } from '../environments/environment';
+import { Usuario } from '../components/usuarios/usuario.model';
 @Injectable({
   providedIn: 'root'
 })
@@ -94,6 +95,14 @@ export class SupabaseService {
       .eq('id', userId);
 
     return { error };
+  }
+
+  async getUsuarios(): Promise<{ data: Usuario[] | null; error: any }> {
+    const { data, error } = await this.supabase
+      .from('usuarios')
+      .select('*');
+
+    return { data: data as Usuario[] | null, error };
   }
 
   async uploadAvatar(userId: string, file: File) {
