@@ -16,15 +16,14 @@ export class SupabaseService {
     return await this.supabase.auth.signInWithPassword({ email, password });
   }
 
-  async signUp(email: string, password: string, cpf: string, nome: string, numeroFicha: string) {
+  async signUp(email: string, password: string, cpf: string, nome: string) {
     const { data, error } = await this.supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           name: nome,
-          cpf,
-          ficha: numeroFicha
+          cpf: cpf
         }
       }
     });
@@ -35,7 +34,6 @@ export class SupabaseService {
         email,
         nome,
         cpf,
-        numero_ficha: numeroFicha,
         data_nascimento: '2000-01-01',
         perfil_nome: 'Agente Promotor'
       });

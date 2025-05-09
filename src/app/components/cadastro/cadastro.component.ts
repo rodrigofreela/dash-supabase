@@ -32,7 +32,7 @@ export class CadastroComponent implements OnInit {
   }
 
   async register() {
-    const { error } = await this.supabase.signUp(this.email, this.password, this.cpf, this.nome, this.numeroFicha);
+    const { error } = await this.supabase.signUp(this.email, this.password, this.cpf, this.nome);
     if (!error) {
       await this.router.navigateByUrl('/perfil');
     } else {

@@ -35,10 +35,10 @@ export class AuthComponent {
     await this.router.navigateByUrl('/perfil');
   }
 
-  async loginGoogle() {
-    const { error } = await this.supabase.signInWithGoogle();
-    if (!error) {
-      await this.router.navigateByUrl('/perfil');
-    }
-  }
+  // async loginGoogle() {
+  //   const { error } = await this.supabase.signInWithGoogle();
+  //   if (!error) {
+  //     await this.router.navigateByUrl('/perfil');
+  //   }
+  // }
 }
