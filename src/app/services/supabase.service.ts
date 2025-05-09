@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { createClient, User } from '@supabase/supabase-js';
-import { environment } from '../../environments/environment';
-
+import { environment } from '../environments/environment';
 @Injectable({
   providedIn: 'root'
 })
@@ -11,37 +10,35 @@ export class SupabaseService {
     environment.SUPABASE_ANON_KEY
   );
 
+  // Autenticação
   async signIn(email: string, password: string) {
     return await this.supabase.auth.signInWithPassword({ email, password });
   }
 
-  async signUp(email: string, password: string, cpf: string, nome: string): Promise<{ data: any; error: any }> {
+  async signUp(email: string, password: string, cpf: string, nome: string, numeroFicha: string) {
     const { data, error } = await this.supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { cpf, nome }
+        data: {
+          name: nome,
+          cpf,
+          ficha: numeroFicha
+        }
       }
     });
 
     if (data.user && !error) {
-      // Insere dados adicionais na tabela personalizada
       await this.supabase.from('usuarios').insert({
         id: data.user.id,
-        cpf,
+        email,
         nome,
-        perfil_nome: 'Agente Promotor',
-        login_com_sistema_pre_selecionado: true
+        cpf,
+        numero_ficha: numeroFicha,
+        data_nascimento: '2000-01-01',
+        perfil_nome: 'Agente Promotor'
       });
     }
-
-    return { data, error };
-  }
-
-  async getUsuarios() {
-    const { data, error } = await this.supabase
-      .from('usuarios')
-      .select('*');
 
     return { data, error };
   }
@@ -65,10 +62,27 @@ export class SupabaseService {
     return { data, error };
   }
 
+  async getRegionais() {
+    const { data, error } = await this.supabase
+      .from('regionais')
+      .select('id, nome');
+
+    return { data, error };
+  }
+
+  async getDivisoesPorRegional(regionalId: number) {
+    const { data, error } = await this.supabase
+      .from('divisoes')
+      .select('id, nome')
+      .eq('regional_id', regionalId);
+
+    return { data, error };
+  }
+
   async getPerfis() {
     const { data, error } = await this.supabase
       .from('perfis')
-      .select('*');
+      .select('nome, grau');
 
     return { data, error };
   }
@@ -107,43 +121,44 @@ export class SupabaseService {
     return publicUrl;
   }
 
-  async getDivisoesAtivas() {
+  async getEventos() {
     const { data, error } = await this.supabase
-      .from('divisoes_ativas')
-      .select('divisao_id, divisao_nome, regional_id, regional_nome');
+      .from('eventos')
+      .select('*');
 
     return { data, error };
   }
 
-  // Buscar regionais
-async getRegionais() {
-  const { data, error } = await this.supabase
-    .from('regionais')
-    .select('id, nome');
+  async getParticipacoes(usuarioId: string) {
+    const { data, error } = await this.supabase
+      .from('participacoes')
+      .select('*')
+      .eq('usuario_id', usuarioId);
 
-  return { data, error };
-}
-
-// Buscar divisões por regional
-async getDivisoesPorRegional(regionalId: number) {
-  const { data, error } = await this.supabase
-    .from('divisoes')
-    .select('id, nome')
-    .eq('regional_id', regionalId);
-
-  return { data, error };
-}
-
-  setPerfilSelecionado(perfil: string) {
-    localStorage.setItem('perfil_selecionado', perfil);
+    return { data, error };
   }
 
-  getPerfilSelecionado(): string | null {
-    return localStorage.getItem('perfil_selecionado');
+  async registrarParticipacao(usuarioId: string, eventoId: number) {
+    const { error } = await this.supabase
+      .from('participacoes')
+      .insert({
+        usuario_id: usuarioId,
+        evento_id: eventoId,
+        participacao: 'presente'
+      });
+
+    return { error };
   }
 
-  signInWithGoogle() {
-    return this.supabase.auth.signInWithOAuth({ provider: 'google' });
-  }
+  async updateDadosAdicionais(userId: string, regionalId: number | null, divisaoId: number | null) {
+    const { error } = await this.supabase
+      .from('usuarios')
+      .update({
+        regional_id: regionalId,
+        divisao_id: divisaoId
+      })
+      .eq('id', userId);
 
+    return { error };
+  }
 }

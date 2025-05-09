@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormsModule, NgModel } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { SupabaseService } from '../../services/supabase.service';
 
@@ -28,20 +28,17 @@ export class PerfilComponent implements OnInit {
     const user = await this.supabase.currentUser();
     if (!user) return;
 
-    const { data: usuarioData } = await this.supabase.getUsuario(user.id);
-    this.usuario = usuarioData;
+    const { data } = await this.supabase.getUsuario(user.id);
+    this.usuario = data;
 
-    // Carrega os dados principais
-    const { data: perfisData } = await this.supabase.getPerfis();
-    this.perfis = perfisData || [];
+    const { data: perfis } = await this.supabase.getPerfis();
+    this.perfis = perfis || [];
 
     this.avatar = this.usuario?.avatar_url || 'assets/avatar-default.png';
 
-    // Carrega regionais
-    const { data: regionaisData } = await this.supabase.getRegionais();
-    this.regionais = regionaisData || [];
+    const { data: regionais } = await this.supabase.getRegionais();
+    this.regionais = regionais || [];
 
-    // Carrega divisões se tiver regional selecionado
     if (this.usuario?.regional_id) {
       await this.filtrarDivisoes(this.usuario.regional_id);
       this.selectedRegionalId = this.usuario.regional_id;
@@ -59,7 +56,9 @@ export class PerfilComponent implements OnInit {
     }
   }
 
-  async filtrarDivisoes(regionalId: number) {
+  async filtrarDivisoes(regionalId: number | null): Promise<void> {
+    if (!regionalId) return;
+
     const { data, error } = await this.supabase.getDivisoesPorRegional(regionalId);
     if (data) {
       this.divisoes = data;
@@ -70,20 +69,18 @@ export class PerfilComponent implements OnInit {
     const user = await this.supabase.currentUser();
     if (!user) return;
 
-    const { error } = await this.supabase.supabase
-      .from('usuarios')
-      .update({
-        regional_id: this.selectedRegionalId,
-        divisao_id: this.selectedDivisaoId
-      })
-      .eq('id', user.id);
+    const { error } = await this.supabase.updateDadosAdicionais(
+      user.id,
+      this.selectedRegionalId,
+      this.selectedDivisaoId
+    );
 
     if (!error) {
       this.usuario.regional_id = this.selectedRegionalId;
       this.usuario.divisao_id = this.selectedDivisaoId;
-      alert('Dados salvos com sucesso!');
+      alert('Dados atualizados!');
     } else {
-      alert('Erro ao salvar os dados.');
+      alert('Erro ao atualizar os dados.');
     }
   }
 
