@@ -1,0 +1,21 @@
+<div *ngIf="usuario">
+  <h3>Bem-vindo(a), {{ usuario.nome }}</h3>
+
+  <img [src]="avatar" width="100" />
+  <input type="file" (change)="uploadAvatar($event)" />
+
+  <!-- Seletor de Regional -->
+  <label for="regional">Selecione sua Regional:</label>
+  <select id="regional" [(ngModel)]="selectedRegionalId" (change)="filtrarDivisoes(selectedRegionalId)">
+    <option *ngFor="let r of regionais" [value]="r.id">{{ r.nome }}</option>
+  </select>
+
+  <!-- Seletor de Divisão -->
+  <label for="divisao">Selecione sua Divisão:</label>
+  <select id="divisao" [(ngModel)]="selectedDivisaoId">
+    <option *ngFor="let d of divisoes" [value]="d.id">{{ d.nome }}</option>
+  </select>
+
+  <!-- Botão Salvar -->
+  <button (click)="salvarDadosAdicionais()">Salvar Dados</button>
+</div>
